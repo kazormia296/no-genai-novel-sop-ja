@@ -1,0 +1,232 @@
+{
+  "schema_version": "1.0.0",
+  "encoding": "UTF-8",
+  "line_ending": "LF",
+  "delimiter": "TAB",
+  "multiple_value_separator": ";",
+  "unknown_value": "UNKNOWN",
+  "none_value": "NONE",
+  "record_status_values": ["ACTIVE", "SUPERSEDED", "VOID"],
+  "registers": [
+    {
+      "id": "SOURCE_REGISTER",
+      "template": "templates/SOURCE_REGISTER.tsv",
+      "project_path": "CORPUS/SOURCES.tsv",
+      "description": "承認資料の識別、発見・入手経路、生成AI来歴および利用許可を記録する。",
+      "columns": ["SOURCE_ID", "AUTHOR", "TITLE", "PUBLISHER_OR_ISSUER", "PUBLICATION_DATE", "EDITION", "ACQUISITION_PATH", "DISCOVERY_METHOD", "MEDIUM", "PAGES_OR_SECTION", "HUMAN_AUTHORSHIP_STATUS", "GENAI_STATUS", "FILE_SHA256", "PERMITTED_USE", "REVIEWER", "REVIEW_DATE", "RECORD_STATUS", "SUPERSEDES_ID", "NOTES"],
+      "required": ["SOURCE_ID", "TITLE", "ACQUISITION_PATH", "DISCOVERY_METHOD", "MEDIUM", "HUMAN_AUTHORSHIP_STATUS", "GENAI_STATUS", "PERMITTED_USE", "REVIEWER", "REVIEW_DATE", "RECORD_STATUS"],
+      "primary_key": ["SOURCE_ID"],
+      "formats": {"SOURCE_ID": "source_id", "PUBLICATION_DATE": "date_or_partial", "FILE_SHA256": "sha256_or_unknown", "REVIEW_DATE": "date"},
+      "enums": {"HUMAN_AUTHORSHIP_STATUS": ["H", "U", "A"], "GENAI_STATUS": ["NONE_CONFIRMED", "UNKNOWN", "PRESENT", "NOT_APPLICABLE"], "RECORD_STATUS": ["ACTIVE", "SUPERSEDED", "VOID"]},
+      "self_reference": {"column": "SUPERSEDES_ID", "target": "SOURCE_ID"}
+    },
+    {
+      "id": "IDEA_REGISTER",
+      "template": "templates/IDEA_REGISTER.tsv",
+      "project_path": "IDEAS/IDEAS.tsv",
+      "description": "着想の発生日時、場所、直接契機、選択経路、作者による変更および作品利用を記録する。",
+      "columns": ["IDEA_ID", "CREATED_AT", "PLACE", "CONTENT_SUMMARY", "DIRECT_TRIGGER", "DIRECT_SOURCE_ID", "SOURCE_CLASS", "SELECTION_ROUTE", "AUTHOR_MODIFICATION", "GENAI_RISK", "EXPRESSION_DEPENDENCY", "WORK_USE", "STATUS", "REVIEWER", "RECORD_STATUS", "SUPERSEDES_ID", "NOTES"],
+      "required": ["IDEA_ID", "CREATED_AT", "CONTENT_SUMMARY", "DIRECT_TRIGGER", "SOURCE_CLASS", "SELECTION_ROUTE", "GENAI_RISK", "STATUS", "REVIEWER", "RECORD_STATUS"],
+      "primary_key": ["IDEA_ID"],
+      "formats": {"IDEA_ID": "idea_id", "CREATED_AT": "utc_datetime"},
+      "enums": {"SOURCE_CLASS": ["O", "E", "D", "R", "H", "C", "M", "A"], "GENAI_RISK": ["LOW", "MEDIUM", "HIGH", "PROHIBITED", "UNKNOWN"], "STATUS": ["ADOPTED", "PENDING", "REJECTED"], "RECORD_STATUS": ["ACTIVE", "SUPERSEDED", "VOID"]},
+      "conditional_foreign_keys": [{"when_column": "SOURCE_CLASS", "when_value": "R", "column": "DIRECT_SOURCE_ID", "register": "SOURCE_REGISTER", "target": "SOURCE_ID"}],
+      "self_reference": {"column": "SUPERSEDES_ID", "target": "IDEA_ID"}
+    },
+    {
+      "id": "SESSION_REGISTER",
+      "template": "templates/SESSION_REGISTER.tsv",
+      "project_path": "REVIEW/SESSION_LOG.tsv",
+      "description": "執筆セッションと参照資料、着想、制作環境、辞書および例外を結び付ける。",
+      "columns": ["SESSION_ID", "START_AT", "END_AT", "CHAPTER_OR_SCENE", "SOURCE_IDS", "IDEA_IDS", "DEVICE_ID", "ENVIRONMENT_ID", "DICTIONARY_ID", "EXCEPTION_STATUS", "EXCEPTION_IDS", "OPERATOR", "RECORD_STATUS", "SUPERSEDES_ID", "NOTES"],
+      "required": ["SESSION_ID", "START_AT", "END_AT", "CHAPTER_OR_SCENE", "DEVICE_ID", "ENVIRONMENT_ID", "DICTIONARY_ID", "EXCEPTION_STATUS", "OPERATOR", "RECORD_STATUS"],
+      "primary_key": ["SESSION_ID"],
+      "formats": {"SESSION_ID": "session_id", "START_AT": "utc_datetime", "END_AT": "utc_datetime", "SOURCE_IDS": "source_id_list", "IDEA_IDS": "idea_id_list", "EXCEPTION_IDS": "exception_id_list"},
+      "enums": {"EXCEPTION_STATUS": ["NONE", "OPEN", "CLOSED"], "RECORD_STATUS": ["ACTIVE", "SUPERSEDED", "VOID"]},
+      "foreign_keys": [
+        {"column": "SOURCE_IDS", "register": "SOURCE_REGISTER", "target": "SOURCE_ID", "multiple": true},
+        {"column": "IDEA_IDS", "register": "IDEA_REGISTER", "target": "IDEA_ID", "multiple": true},
+        {"column": "ENVIRONMENT_ID", "register": "ENVIRONMENT_MANIFEST", "target": "ENVIRONMENT_ID"},
+        {"column": "DICTIONARY_ID", "register": "DICTIONARY_MANIFEST", "target": "DICTIONARY_ID"},
+        {"column": "EXCEPTION_IDS", "register": "EXCEPTION_REGISTER", "target": "EXCEPTION_ID", "multiple": true}
+      ],
+      "self_reference": {"column": "SUPERSEDES_ID", "target": "SESSION_ID"}
+    },
+    {
+      "id": "ENVIRONMENT_MANIFEST",
+      "template": "templates/ENVIRONMENT_MANIFEST.tsv",
+      "project_path": "MANIFEST/ENVIRONMENT_MANIFEST.tsv",
+      "description": "制作環境版を構成するハードウェア、ソフトウェア、設定および来歴を記録する。",
+      "columns": ["ENVIRONMENT_ID", "CATEGORY", "COMPONENT", "VERSION_OR_COMMIT", "SOURCE", "BINARY_SHA256", "SOURCE_SHA256", "CONFIG_SHA256", "AI_PROVENANCE", "APPROVAL_STATUS", "REVIEWER", "REVIEW_DATE", "RECORD_STATUS", "SUPERSEDES_ID", "NOTES"],
+      "required": ["ENVIRONMENT_ID", "CATEGORY", "COMPONENT", "VERSION_OR_COMMIT", "SOURCE", "AI_PROVENANCE", "APPROVAL_STATUS", "REVIEWER", "REVIEW_DATE", "RECORD_STATUS"],
+      "primary_key": ["ENVIRONMENT_ID", "CATEGORY", "COMPONENT"],
+      "formats": {"BINARY_SHA256": "sha256_or_unknown", "SOURCE_SHA256": "sha256_or_unknown", "CONFIG_SHA256": "sha256_or_unknown", "REVIEW_DATE": "date"},
+      "enums": {"AI_PROVENANCE": ["NONE_CONFIRMED", "UNKNOWN", "PRESENT", "NOT_APPLICABLE"], "APPROVAL_STATUS": ["APPROVED", "REJECTED", "CONDITIONAL"], "RECORD_STATUS": ["ACTIVE", "SUPERSEDED", "VOID"]}
+    },
+    {
+      "id": "DICTIONARY_MANIFEST",
+      "template": "templates/DICTIONARY_MANIFEST.tsv",
+      "project_path": "MANIFEST/DICTIONARY_MANIFEST.tsv",
+      "description": "辞書、個人辞書および辞書データの固定版と来歴を記録する。",
+      "columns": ["DICTIONARY_ID", "FILE_NAME", "VERSION_OR_COMMIT", "SOURCE", "ACQUIRED_DATE", "FILE_SHA256", "COMPILER_OR_MAINTAINER", "AI_PROVENANCE", "APPROVAL_STATUS", "REVIEWER", "REVIEW_DATE", "RECORD_STATUS", "SUPERSEDES_ID", "NOTES"],
+      "required": ["DICTIONARY_ID", "FILE_NAME", "VERSION_OR_COMMIT", "SOURCE", "ACQUIRED_DATE", "FILE_SHA256", "AI_PROVENANCE", "APPROVAL_STATUS", "REVIEWER", "REVIEW_DATE", "RECORD_STATUS"],
+      "primary_key": ["DICTIONARY_ID"],
+      "formats": {"ACQUIRED_DATE": "date", "FILE_SHA256": "sha256", "REVIEW_DATE": "date"},
+      "enums": {"AI_PROVENANCE": ["NONE_CONFIRMED", "UNKNOWN", "PRESENT", "NOT_APPLICABLE"], "APPROVAL_STATUS": ["APPROVED", "REJECTED", "CONDITIONAL"], "RECORD_STATUS": ["ACTIVE", "SUPERSEDED", "VOID"]},
+      "self_reference": {"column": "SUPERSEDES_ID", "target": "DICTIONARY_ID"}
+    },
+    {
+      "id": "EXCEPTION_REGISTER",
+      "template": "templates/EXCEPTION_REGISTER.tsv",
+      "project_path": "POLICY/EXCEPTIONS.tsv",
+      "description": "逸脱、影響、重大度、是正期限、再監査および処分を記録する。",
+      "columns": ["EXCEPTION_ID", "OCCURRED_AT", "DISCOVERED_BY", "EVENT_TYPE", "DESCRIPTION", "AFFECTED_FILES", "AFFECTED_SESSIONS", "AFFECTED_SOURCE_OR_IDEA_IDS", "IMMEDIATE_ACTION", "IMPACT_ASSESSMENT", "SEVERITY", "CORRECTIVE_ACTION", "DISPOSITION", "APPROVED_BY", "CORRECTION_DUE_AT", "REAUDIT_REQUIRED", "CLOSED_AT", "RECORD_STATUS", "SUPERSEDES_ID", "NOTES"],
+      "required": ["EXCEPTION_ID", "OCCURRED_AT", "DISCOVERED_BY", "EVENT_TYPE", "DESCRIPTION", "IMMEDIATE_ACTION", "IMPACT_ASSESSMENT", "SEVERITY", "DISPOSITION", "APPROVED_BY", "REAUDIT_REQUIRED", "RECORD_STATUS"],
+      "primary_key": ["EXCEPTION_ID"],
+      "formats": {"EXCEPTION_ID": "exception_id", "OCCURRED_AT": "utc_datetime", "AFFECTED_SESSIONS": "session_id_list", "CORRECTION_DUE_AT": "utc_datetime_or_none", "CLOSED_AT": "utc_datetime_or_empty"},
+      "enums": {"SEVERITY": ["MINOR", "MAJOR", "CRITICAL"], "DISPOSITION": ["OPEN", "CORRECTED", "ACCEPTED_LIMITATION", "REJECTED_INPUT", "PROFILE_DOWNGRADED", "FAILED"], "REAUDIT_REQUIRED": ["YES", "NO"], "RECORD_STATUS": ["ACTIVE", "SUPERSEDED", "VOID"]},
+      "foreign_keys": [{"column": "AFFECTED_SESSIONS", "register": "SESSION_REGISTER", "target": "SESSION_ID", "multiple": true}],
+      "self_reference": {"column": "SUPERSEDES_ID", "target": "EXCEPTION_ID"}
+    },
+    {
+      "id": "EVIDENCE_ANCHOR_REGISTER",
+      "template": "templates/EVIDENCE_ANCHOR_REGISTER.tsv",
+      "project_path": "AUDIT/EVIDENCE_ANCHORS.tsv",
+      "description": "証拠集合を第三者時刻証明、署名、追記専用ログ、書換不能媒体または立会記録へ外部固定した事実を記録する。",
+      "columns": ["ANCHOR_ID", "CREATED_AT", "ASSURANCE_CLASS", "SUBJECT_IDS", "METHOD", "PROVIDER_OR_WITNESS", "URI_OR_MEDIA_ID", "SUBJECT_SHA256", "SIGNATURE_OR_RECEIPT", "VERIFIED_BY", "VERIFIED_AT", "RECORD_STATUS", "SUPERSEDES_ID", "NOTES"],
+      "required": ["ANCHOR_ID", "CREATED_AT", "ASSURANCE_CLASS", "SUBJECT_IDS", "METHOD", "PROVIDER_OR_WITNESS", "URI_OR_MEDIA_ID", "SUBJECT_SHA256", "VERIFIED_BY", "VERIFIED_AT", "RECORD_STATUS"],
+      "primary_key": ["ANCHOR_ID"],
+      "formats": {"CREATED_AT": "utc_datetime", "SUBJECT_SHA256": "sha256", "VERIFIED_AT": "utc_datetime"},
+      "enums": {"ASSURANCE_CLASS": ["SELF-ATTESTED", "SECOND-PARTY", "INDEPENDENT"], "METHOD": ["SIGNED_COMMIT", "SIGNED_TAG", "TRUSTED_TIMESTAMP", "APPEND_ONLY_LOG", "WRITE_ONCE_MEDIA", "WITNESS_ATTESTATION", "OTHER"], "RECORD_STATUS": ["ACTIVE", "SUPERSEDED", "VOID"]},
+      "self_reference": {"column": "SUPERSEDES_ID", "target": "ANCHOR_ID"}
+    },
+    {
+      "id": "P4H_CUTOFF_REGISTER",
+      "template": "templates/P4H_CUTOFF_REGISTER.tsv",
+      "project_path": "MANIFEST/P4H_CUTOFFS.tsv",
+      "description": "P4-Hカットオフ宣言を一意に記録する。",
+      "columns": ["CUTOFF_ID", "CUTOFF_UTC", "CUTOFF_BASIS", "BUILD_METHOD", "FIRMWARE_SCOPE", "HARDWARE_SCOPE", "APPROVAL_STATUS", "REVIEWER", "REVIEW_DATE", "RECORD_STATUS", "SUPERSEDES_ID", "NOTES"],
+      "required": ["CUTOFF_ID", "CUTOFF_UTC", "CUTOFF_BASIS", "BUILD_METHOD", "FIRMWARE_SCOPE", "HARDWARE_SCOPE", "APPROVAL_STATUS", "REVIEWER", "REVIEW_DATE", "RECORD_STATUS"],
+      "primary_key": ["CUTOFF_ID"],
+      "formats": {"CUTOFF_UTC": "utc_datetime", "REVIEW_DATE": "date"},
+      "enums": {"BUILD_METHOD": ["H-BINARY", "H-SOURCE", "MIXED"], "FIRMWARE_SCOPE": ["INCLUDED", "EXCLUDED", "PARTIAL"], "APPROVAL_STATUS": ["APPROVED", "REJECTED", "CONDITIONAL"], "RECORD_STATUS": ["ACTIVE", "SUPERSEDED", "VOID"]},
+      "self_reference": {"column": "SUPERSEDES_ID", "target": "CUTOFF_ID"}
+    },
+    {
+      "id": "P4H_TECHNOLOGY_REGISTER",
+      "template": "templates/P4H_TECHNOLOGY_REGISTER.tsv",
+      "project_path": "MANIFEST/P4H_TECHNOLOGIES.tsv",
+      "description": "排除対象技術、合理的な利用可能時点および根拠をカットオフ宣言から分離して記録する。",
+      "columns": ["TECHNOLOGY_ID", "CUTOFF_ID", "NAME", "DEFINITION", "AVAILABLE_AT", "EVIDENCE_IDS", "DECLARATION_SUBSTITUTION_ALLOWED", "APPROVAL_STATUS", "REVIEWER", "REVIEW_DATE", "RECORD_STATUS", "SUPERSEDES_ID", "NOTES"],
+      "required": ["TECHNOLOGY_ID", "CUTOFF_ID", "NAME", "DEFINITION", "AVAILABLE_AT", "EVIDENCE_IDS", "DECLARATION_SUBSTITUTION_ALLOWED", "APPROVAL_STATUS", "REVIEWER", "REVIEW_DATE", "RECORD_STATUS"],
+      "primary_key": ["TECHNOLOGY_ID"],
+      "formats": {"AVAILABLE_AT": "utc_datetime_or_unknown", "EVIDENCE_IDS": "evidence_id_list", "REVIEW_DATE": "date"},
+      "enums": {"DECLARATION_SUBSTITUTION_ALLOWED": ["YES", "NO"], "APPROVAL_STATUS": ["APPROVED", "REJECTED", "CONDITIONAL"], "RECORD_STATUS": ["ACTIVE", "SUPERSEDED", "VOID"]},
+      "foreign_keys": [{"column": "CUTOFF_ID", "register": "P4H_CUTOFF_REGISTER", "target": "CUTOFF_ID"}, {"column": "EVIDENCE_IDS", "register": "P4H_EVIDENCE_REGISTER", "target": "EVIDENCE_ID", "multiple": true}],
+      "self_reference": {"column": "SUPERSEDES_ID", "target": "TECHNOLOGY_ID"}
+    },
+    {
+      "id": "P4H_EVIDENCE_REGISTER",
+      "template": "templates/P4H_EVIDENCE_REGISTER.tsv",
+      "project_path": "MANIFEST/P4H_EVIDENCE.tsv",
+      "description": "外部定義、公開記録、アーカイブ、署名および取得物を版・取得日・ハッシュ付きで記録する。",
+      "columns": ["EVIDENCE_ID", "EVIDENCE_TYPE", "TITLE", "ISSUER", "PUBLISHED_AT", "CAPTURED_AT", "URI", "FILE_SHA256", "SIGNATURE_OR_ATTESTATION", "VERIFIED_BY", "VERIFIED_AT", "RECORD_STATUS", "SUPERSEDES_ID", "NOTES"],
+      "required": ["EVIDENCE_ID", "EVIDENCE_TYPE", "TITLE", "ISSUER", "PUBLISHED_AT", "CAPTURED_AT", "URI", "FILE_SHA256", "VERIFIED_BY", "VERIFIED_AT", "RECORD_STATUS"],
+      "primary_key": ["EVIDENCE_ID"],
+      "formats": {"PUBLISHED_AT": "utc_datetime_or_unknown", "CAPTURED_AT": "utc_datetime", "FILE_SHA256": "sha256", "VERIFIED_AT": "utc_datetime"},
+      "enums": {"EVIDENCE_TYPE": ["OFFICIAL_RELEASE", "ARCHIVE_CAPTURE", "SIGNED_METADATA", "SOURCE_SNAPSHOT", "TECHNOLOGY_DEFINITION", "BUILD_RECORD", "OTHER"], "RECORD_STATUS": ["ACTIVE", "SUPERSEDED", "VOID"]},
+      "self_reference": {"column": "SUPERSEDES_ID", "target": "EVIDENCE_ID"}
+    },
+    {
+      "id": "P4H_COMPONENT_REGISTER",
+      "template": "templates/P4H_COMPONENT_REGISTER.tsv",
+      "project_path": "MANIFEST/P4H_COMPONENTS.tsv",
+      "description": "P4-H対象構成物と締切・ビルド・ファームウェア境界を記録する。",
+      "columns": ["ARTIFACT_ID", "CUTOFF_ID", "SCOPE_CATEGORY", "NAME", "VERSION_OR_COMMIT", "ARTIFACT_TYPE", "FIRST_PUBLISHED_AT", "SOURCE_URI", "SHA256", "BUILD_METHOD", "BUILD_ENVIRONMENT_ID", "BOOTSTRAP_SEED_ID", "REPRODUCIBLE_BUILD_STATUS", "FIRMWARE_SCOPE", "POST_CUTOFF_INPUT_Y_N", "EXCEPTION_ID", "APPROVAL_STATUS", "REVIEWER", "REVIEW_DATE", "RECORD_STATUS", "SUPERSEDES_ID", "NOTES"],
+      "required": ["ARTIFACT_ID", "CUTOFF_ID", "SCOPE_CATEGORY", "NAME", "VERSION_OR_COMMIT", "ARTIFACT_TYPE", "FIRST_PUBLISHED_AT", "SOURCE_URI", "SHA256", "BUILD_METHOD", "REPRODUCIBLE_BUILD_STATUS", "FIRMWARE_SCOPE", "POST_CUTOFF_INPUT_Y_N", "APPROVAL_STATUS", "REVIEWER", "REVIEW_DATE", "RECORD_STATUS"],
+      "primary_key": ["ARTIFACT_ID"],
+      "formats": {"FIRST_PUBLISHED_AT": "utc_datetime", "SHA256": "sha256", "EXCEPTION_ID": "exception_id_or_empty", "REVIEW_DATE": "date"},
+      "enums": {"BUILD_METHOD": ["H-BINARY", "H-SOURCE", "NOT_APPLICABLE"], "REPRODUCIBLE_BUILD_STATUS": ["PASS", "FAIL", "NOT_TESTED", "NOT_APPLICABLE"], "FIRMWARE_SCOPE": ["INCLUDED", "EXCLUDED", "PARTIAL", "NOT_APPLICABLE"], "POST_CUTOFF_INPUT_Y_N": ["YES", "NO"], "APPROVAL_STATUS": ["APPROVED", "REJECTED", "CONDITIONAL"], "RECORD_STATUS": ["ACTIVE", "SUPERSEDED", "VOID"]},
+      "foreign_keys": [{"column": "CUTOFF_ID", "register": "P4H_CUTOFF_REGISTER", "target": "CUTOFF_ID"}, {"column": "BUILD_ENVIRONMENT_ID", "register": "P4H_BUILD_ENVIRONMENT_REGISTER", "target": "BUILD_ENVIRONMENT_ID"}, {"column": "BOOTSTRAP_SEED_ID", "register": "P4H_BOOTSTRAP_SEED_REGISTER", "target": "BOOTSTRAP_SEED_ID"}, {"column": "EXCEPTION_ID", "register": "EXCEPTION_REGISTER", "target": "EXCEPTION_ID"}],
+      "self_reference": {"column": "SUPERSEDES_ID", "target": "ARTIFACT_ID"}
+    },
+    {
+      "id": "P4H_COMPONENT_EVIDENCE_REGISTER",
+      "template": "templates/P4H_COMPONENT_EVIDENCE_REGISTER.tsv",
+      "project_path": "MANIFEST/P4H_COMPONENT_EVIDENCE.tsv",
+      "description": "構成物と複数の保存・公開証拠を多対多で対応付ける。",
+      "columns": ["LINK_ID", "ARTIFACT_ID", "EVIDENCE_ID", "PURPOSE", "VERIFIED_BY", "VERIFIED_AT", "RECORD_STATUS", "SUPERSEDES_ID", "NOTES"],
+      "required": ["LINK_ID", "ARTIFACT_ID", "EVIDENCE_ID", "PURPOSE", "VERIFIED_BY", "VERIFIED_AT", "RECORD_STATUS"],
+      "primary_key": ["LINK_ID"],
+      "formats": {"VERIFIED_AT": "utc_datetime"},
+      "enums": {"PURPOSE": ["PUBLICATION_TIME", "ARCHIVE_TIME", "IDENTITY", "SIGNATURE", "SOURCE_CORRESPONDENCE", "BUILD_PROVENANCE", "OTHER"], "RECORD_STATUS": ["ACTIVE", "SUPERSEDED", "VOID"]},
+      "foreign_keys": [{"column": "ARTIFACT_ID", "register": "P4H_COMPONENT_REGISTER", "target": "ARTIFACT_ID"}, {"column": "EVIDENCE_ID", "register": "P4H_EVIDENCE_REGISTER", "target": "EVIDENCE_ID"}],
+      "self_reference": {"column": "SUPERSEDES_ID", "target": "LINK_ID"}
+    },
+    {
+      "id": "P4H_BUILD_ENVIRONMENT_REGISTER",
+      "template": "templates/P4H_BUILD_ENVIRONMENT_REGISTER.tsv",
+      "project_path": "MANIFEST/P4H_BUILD_ENVIRONMENTS.tsv",
+      "description": "H-SOURCEのビルダーOS、ツールチェーン、全入力および再現性比較を記録する。",
+      "columns": ["BUILD_ENVIRONMENT_ID", "CUTOFF_ID", "NAME", "VERSION_OR_COMMIT", "SOURCE_URI", "SHA256", "INPUT_MANIFEST_SHA256", "NETWORK_DISABLED_Y_N", "REPRODUCIBLE_BUILD_STATUS", "COMPARISON_RECORD_SHA256", "APPROVAL_STATUS", "REVIEWER", "REVIEW_DATE", "RECORD_STATUS", "SUPERSEDES_ID", "NOTES"],
+      "required": ["BUILD_ENVIRONMENT_ID", "CUTOFF_ID", "NAME", "VERSION_OR_COMMIT", "SOURCE_URI", "SHA256", "INPUT_MANIFEST_SHA256", "NETWORK_DISABLED_Y_N", "REPRODUCIBLE_BUILD_STATUS", "APPROVAL_STATUS", "REVIEWER", "REVIEW_DATE", "RECORD_STATUS"],
+      "primary_key": ["BUILD_ENVIRONMENT_ID"],
+      "formats": {"SHA256": "sha256", "INPUT_MANIFEST_SHA256": "sha256", "COMPARISON_RECORD_SHA256": "sha256_or_empty", "REVIEW_DATE": "date"},
+      "enums": {"NETWORK_DISABLED_Y_N": ["YES", "NO"], "REPRODUCIBLE_BUILD_STATUS": ["PASS", "FAIL", "NOT_TESTED"], "APPROVAL_STATUS": ["APPROVED", "REJECTED", "CONDITIONAL"], "RECORD_STATUS": ["ACTIVE", "SUPERSEDED", "VOID"]},
+      "foreign_keys": [{"column": "CUTOFF_ID", "register": "P4H_CUTOFF_REGISTER", "target": "CUTOFF_ID"}],
+      "self_reference": {"column": "SUPERSEDES_ID", "target": "BUILD_ENVIRONMENT_ID"}
+    },
+    {
+      "id": "P4H_BOOTSTRAP_SEED_REGISTER",
+      "template": "templates/P4H_BOOTSTRAP_SEED_REGISTER.tsv",
+      "project_path": "MANIFEST/P4H_BOOTSTRAP_SEEDS.tsv",
+      "description": "ブートストラップ種の種類、版、由来、ハッシュおよび保証境界を記録する。",
+      "columns": ["BOOTSTRAP_SEED_ID", "CUTOFF_ID", "NAME", "VERSION", "SOURCE_URI", "SHA256", "FIRST_PUBLISHED_AT", "SCOPE_STATUS", "EVIDENCE_IDS", "APPROVAL_STATUS", "REVIEWER", "REVIEW_DATE", "RECORD_STATUS", "SUPERSEDES_ID", "NOTES"],
+      "required": ["BOOTSTRAP_SEED_ID", "CUTOFF_ID", "NAME", "VERSION", "SOURCE_URI", "SHA256", "FIRST_PUBLISHED_AT", "SCOPE_STATUS", "EVIDENCE_IDS", "APPROVAL_STATUS", "REVIEWER", "REVIEW_DATE", "RECORD_STATUS"],
+      "primary_key": ["BOOTSTRAP_SEED_ID"],
+      "formats": {"SHA256": "sha256", "FIRST_PUBLISHED_AT": "utc_datetime", "EVIDENCE_IDS": "evidence_id_list", "REVIEW_DATE": "date"},
+      "enums": {"SCOPE_STATUS": ["INCLUDED", "EXCLUDED", "PARTIAL"], "APPROVAL_STATUS": ["APPROVED", "REJECTED", "CONDITIONAL"], "RECORD_STATUS": ["ACTIVE", "SUPERSEDED", "VOID"]},
+      "foreign_keys": [{"column": "CUTOFF_ID", "register": "P4H_CUTOFF_REGISTER", "target": "CUTOFF_ID"}, {"column": "EVIDENCE_IDS", "register": "P4H_EVIDENCE_REGISTER", "target": "EVIDENCE_ID", "multiple": true}],
+      "self_reference": {"column": "SUPERSEDES_ID", "target": "BOOTSTRAP_SEED_ID"}
+    },
+    {
+      "id": "P4H_EXCEPTION_LINK_REGISTER",
+      "template": "templates/P4H_EXCEPTION_LINK_REGISTER.tsv",
+      "project_path": "MANIFEST/P4H_EXCEPTION_LINKS.tsv",
+      "description": "P4-Hのカットオフまたは構成物と一般例外記録を対応付け、表示への影響を記録する。",
+      "columns": ["LINK_ID", "CUTOFF_ID", "ARTIFACT_ID", "EXCEPTION_ID", "IMPACT_ON_CLAIM", "DISPOSITION", "REVIEWER", "REVIEW_DATE", "RECORD_STATUS", "SUPERSEDES_ID", "NOTES"],
+      "required": ["LINK_ID", "CUTOFF_ID", "EXCEPTION_ID", "IMPACT_ON_CLAIM", "DISPOSITION", "REVIEWER", "REVIEW_DATE", "RECORD_STATUS"],
+      "primary_key": ["LINK_ID"],
+      "formats": {"REVIEW_DATE": "date"},
+      "enums": {"IMPACT_ON_CLAIM": ["NONE", "LIMITED", "PROFILE_DOWNGRADE", "P4H_FAIL"], "DISPOSITION": ["OPEN", "CORRECTED", "ACCEPTED_LIMITATION", "FAILED"], "RECORD_STATUS": ["ACTIVE", "SUPERSEDED", "VOID"]},
+      "foreign_keys": [{"column": "CUTOFF_ID", "register": "P4H_CUTOFF_REGISTER", "target": "CUTOFF_ID"}, {"column": "ARTIFACT_ID", "register": "P4H_COMPONENT_REGISTER", "target": "ARTIFACT_ID"}, {"column": "EXCEPTION_ID", "register": "EXCEPTION_REGISTER", "target": "EXCEPTION_ID"}],
+      "self_reference": {"column": "SUPERSEDES_ID", "target": "LINK_ID"}
+    },
+    {
+      "id": "HISTORICAL_CUTOFF_MANIFEST_LEGACY",
+      "template": "templates/HISTORICAL_CUTOFF_MANIFEST.tsv",
+      "legacy": true,
+      "description": "版1.1.0からの移行専用。新規プロジェクトの規範台帳として使用してはならない。",
+      "columns": ["CUTOFF_ID", "CUTOFF_UTC", "CUTOFF_BASIS", "PROHIBITED_TECHNOLOGY_SCOPE", "TECHNOLOGY_AVAILABLE_AT", "CUTOFF_EVIDENCE_IDS", "ARTIFACT_ID", "SCOPE_CATEGORY", "NAME", "VERSION_OR_COMMIT", "ARTIFACT_TYPE", "FIRST_PUBLISHED_AT", "ARCHIVE_CAPTURE_AT", "ARCHIVE_URI", "SOURCE_URI", "SIGNATURE_OR_ATTESTATION", "SHA256", "BUILD_METHOD", "BUILD_ENVIRONMENT_ID", "BOOTSTRAP_SEED_ID", "REPRODUCIBLE_BUILD_STATUS", "FIRMWARE_SCOPE", "POST_CUTOFF_INPUT_Y_N", "EXCEPTION_ID", "APPROVAL_STATUS", "VERIFIED_BY", "VERIFIED_DATE", "NOTES"],
+      "required": [],
+      "primary_key": []
+    }
+  ],
+  "markdown_templates": [
+    {
+      "id": "COLLABORATOR_CONFIRMATION",
+      "path": "templates/COLLABORATOR_CONFIRMATION.md",
+      "required_literals": ["- Project ID:", "- Work title:", "- Applied SOP version/tag/commit:", "- Collaborator ID:", "- Collaborator name:", "- Role:", "- Material received:", "- File hash or paper copy ID:", "- Tools and exact versions used:", "- Work date:", "- Return format:", "- Non-use confirmation: YES / NO", "- Exceptions:", "Signature:", "Date:"]
+    },
+    {
+      "id": "CONFORMANCE_RECORD",
+      "path": "templates/CONFORMANCE_RECORD.md",
+      "required_literals": ["| 採択した基礎プロファイル |", "| 追加プロファイル |", "| 監査保証区分 | SELF-ATTESTED / SECOND-PARTY / INDEPENDENT |", "## C. 保証軸", "| 外部固定証拠台帳 |", "## H. 承認", "- 最終監査結果: PASS / CONDITIONAL PASS / FAIL"]
+    },
+    {
+      "id": "FINAL_AUDIT_CHECKLIST",
+      "path": "templates/FINAL_AUDIT_CHECKLIST.md",
+      "required_literals": ["Assurance class: SELF-ATTESTED / SECOND-PARTY / INDEPENDENT", "Result: PASS / CONDITIONAL PASS / FAIL", "Condition IDs:", "Correction due:", "Re-audit required: YES / NO", "Public claim status:"]
+    }
+  ]
+}

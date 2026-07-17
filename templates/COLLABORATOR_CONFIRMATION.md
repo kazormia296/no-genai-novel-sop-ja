@@ -5,12 +5,15 @@
 - Project ID:
 - Work title:
 - Applied SOP version/tag/commit:
+- Collaborator ID:
 - Collaborator name:
 - Role:
 - Material received:
 - File hash or paper copy ID:
 - Tools and exact versions used:
 - Work date:
+- Return format:
+- Non-use confirmation: YES / NO
 - Exceptions:
 
 Signature:

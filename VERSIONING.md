@@ -24,6 +24,7 @@ SOPは `MAJOR.MINOR.PATCH` 形式で管理する。
 - 注釈付きGitタグ `sop-vMAJOR.MINOR.PATCH`
 - リリース対象コミットの完全な40桁SHA
 - `checksums/SHA256SUMS` 内のファイルハッシュ
+- `schemas/registers.schema.json` と、それから生成したTSVヘッダーおよび人間向け定義
 
 タグ名だけを証拠にしてはならない。タグの移動や再作成の可能性に備え、完全なコミットSHAとファイルハッシュを記録する。
 
@@ -37,7 +38,8 @@ SOPは `MAJOR.MINOR.PATCH` 形式で管理する。
 - 完全なコミットSHA
 - `docs/SOP.md` のSHA-256
 - 採択日および発効日
-- 選択した保証プロファイル
+- 選択した基礎・追加プロファイル
+- 各保証軸と監査保証区分
 - 適用工程と対象外工程
 - ローカル修正の有無
 - 修正がある場合、そのパッチ、コミットまたは修正版文書のSHA-256
@@ -106,22 +108,27 @@ ENV-YYYYMMDD-NNN
 1. `docs/SOP.md` の版を更新する。
 2. `VERSION` を同じ値へ更新する。
 3. `CHANGELOG.md` を更新する。
-4. 全MarkdownとTSVを人間がレビューする。
-5. 改行コードと文字コードを固定する。
-6. `checksums/SHA256SUMS` を再生成する。
-7. 変更をコミットする。
-8. 注釈付きタグを作成する。
-9. タグ、コミットSHAおよびチェックサムをリリース記録へ保存する。
-10. 公開後、タグを移動・再利用しない。
+4. `python3 tools/register_schema.py --write` で配布TSVと列定義を再生成する。
+5. 全Markdown、スキーマおよび生成物を人間がレビューする。
+6. 改行コードと文字コードを固定する。
+7. `checksums/SHA256SUMS` を再生成する。
+8. 変更をコミットし、`./tools/verify-release.sh` を実行する。
+9. CIのスキーマ、リンク、テストおよびリリース検証を通す。
+10. 注釈付きタグを作成し、`./tools/verify-release.sh --require-tag` を実行する。
+11. タグ、コミットSHAおよびチェックサムをリリース記録へ保存する。
+12. 公開後、タグを移動・再利用しない。
 
 ## 10. 適合主張の最小形
 
 ```text
-SOP_VERSION=1.1.0
-SOP_TAG=sop-v1.1.0
+SOP_VERSION=1.2.0
+SOP_TAG=sop-v1.2.0
 SOP_COMMIT=<40桁GitコミットSHA>
 SOP_FILE_SHA256=<64桁SHA-256>
-PROFILE=P1|P2|P3|P4|P4-H|P5
+BASE_PROFILE=P1|P2|P3|P5
+ADDITIONAL_PROFILE=NONE|P4|P4-H
+ASSURANCE_CLASS=SELF-ATTESTED|SECOND-PARTY|INDEPENDENT
+AUDIT_RESULT=PASS|CONDITIONAL_PASS|FAIL
 ENVIRONMENT_ID=<環境版>
 LOCAL_MODIFICATION=NONE|<修正版識別子>
 ```

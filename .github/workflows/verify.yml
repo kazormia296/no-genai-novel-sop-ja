@@ -1,0 +1,29 @@
+name: Verify release metadata and schemas
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+    tags:
+      - "sop-v*"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify checksums, release metadata, and generated schemas
+        run: |
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            ./tools/verify-release.sh --require-tag
+          else
+            ./tools/verify-release.sh
+          fi
+      - name: Test register value and reference validation
+        run: python3 -m unittest discover -s tests -p 'test_*.py'
