@@ -24,14 +24,14 @@ gh repo create kazormia296/no-genai-novel-sop-ja \
   --remote=origin \
   --push
 
-git push origin sop-v1.2.0
+git push origin sop-v1.2.1
 ```
 
 `--push` 後にも、正式版タグがリモートへ存在することを明示的に確認する。
 
 ```sh
 git ls-remote --heads origin main
-git ls-remote --tags origin sop-v1.2.0
+git ls-remote --tags origin sop-v1.2.1
 ```
 
 ## 公開後の確認
@@ -46,7 +46,7 @@ gh repo view kazormia296/no-genai-novel-sop-ja \
 - 所有者とリポジトリ名が正しい。
 - 非公開設定になっている。
 - 既定ブランチが `main` である。
-- `sop-v1.2.0` が想定コミットを指している。
+- `sop-v1.2.1` が想定コミットを指している。
 - リモートの `docs/SOP.md` がローカルのSHA-256と一致する。
 
 ## タグの取扱い

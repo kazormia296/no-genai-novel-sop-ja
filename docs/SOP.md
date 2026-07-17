@@ -2,7 +2,7 @@
 title: "生成AI非使用による小説制作 標準作業手順書"
 short_title: "小説制作AI非使用SOP"
 document_id: "SOP-NOVEL-NO-GENAI-001"
-version: "1.2.0"
+version: "1.2.1"
 status: "運用可能版（組織・個人の承認後に発効）"
 language: "ja-JP"
 confidentiality: "任意"
@@ -15,7 +15,7 @@ confidentiality: "任意"
 | 項目 | 内容 |
 |---|---|
 | 文書ID | SOP-NOVEL-NO-GENAI-001 |
-| 版 | 1.2.0 |
+| 版 | 1.2.1 |
 | 制定日 | YYYY-MM-DD |
 | 発効日 | YYYY-MM-DD |
 | 文書責任者 | 氏名・役割を記入 |
@@ -1267,6 +1267,7 @@ python3 tools/register_schema.py --validate-root /path/to/NOVEL
 
 | 版 | 日付 | 変更内容 | 作成者 | 承認者 |
 |---|---|---|---|---|
+| 1.2.1 | 2026-07-17 | タグイベントで注釈付きタグオブジェクトを取得するCI修正。規範要件の変更なし | OpenAI Codex（所有者指示） |  |
 | 1.2.0 | 2026-07-17 | 規範スキーマ、保証軸、監査保証区分、外部固定証拠、正規化P4-H台帳、監査判定および自動検証を追加 | OpenAI Codex（所有者指示） |  |
 | 1.1.0 | 2026-07-17 | P4-H歴史的カットオフ環境、専用台帳、監査および限定表示を追加 | OpenAI Codex（所有者指示） |  |
 | 1.0.1 | 2026-07-17 | MIT License追加に伴う管理版更新。規範要件の変更なし | OpenAI Codex（所有者指示） |  |
