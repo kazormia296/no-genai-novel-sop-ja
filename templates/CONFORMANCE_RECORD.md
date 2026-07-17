@@ -22,7 +22,7 @@
 | Git tag |  |
 | Full commit SHA |  |
 | `docs/SOP.md` SHA-256 |  |
-| 採択した保証プロファイル | P1 / P2 / P3 / P4 / P5 |
+| 採択した保証プロファイル | P1 / P2 / P3 / P4 / P4-H / P5 |
 | ローカル修正 | NONE / 識別子 |
 | 修正版またはpatchのSHA-256 |  |
 
@@ -57,8 +57,27 @@
 | 着想台帳 |  |  |
 | 検査規則 |  |  |
 | 協力者条件書 |  |  |
+| 歴史的カットオフ台帳 |  |  |
 
-## E. 版移行
+## E. P4-H歴史的カットオフ（P4-H選択時のみ）
+
+| 項目 | 記録 |
+|---|---|
+| Cutoff ID |  |
+| Cutoff UTC | YYYY-MM-DDThh:mm:ssZ |
+| Cutoff basis | 排除対象技術と日時選定根拠 |
+| Prohibited technology scope |  |
+| Technology available at | YYYY-MM-DDThh:mm:ssZ / UNKNOWN（表明代替不可） |
+| Cutoff evidence IDs |  |
+| 構築方式 | H-BINARY / H-SOURCE |
+| 対象構成物 |  |
+| 明示的な対象外 |  |
+| Firmware boundary | INCLUDED / EXCLUDED / PARTIAL |
+| Historical cutoff manifest SHA-256 |  |
+| Bootstrap seed record |  |
+| Post-cutoff input | NONE / 例外ID |
+
+## F. 版移行
 
 - [ ] プロジェクト中にSOP版を変更していない
 - [ ] SOP版を変更した（下表を記入）
@@ -67,7 +86,7 @@
 |---|---|---|---|---|---|
 |  |  |  |  |  |  |
 
-## F. 承認
+## G. 承認
 
 私は、上記の基準版、保証プロファイル、適用境界および固定スナップショットを確認した。
 
