@@ -1,6 +1,6 @@
 # GitHub公開手順
 
-この文書は、完成済みのローカルGitリポジトリをGitHubへ新規作成・送信するための手順である。公開前に、リポジトリ所有者が内容、公開範囲およびライセンス未設定であることを確認する。
+この文書は、完成済みのローカルGitリポジトリをGitHubへ新規作成・送信するための手順である。公開前に、リポジトリ所有者が内容、公開範囲、MIT Licenseの採用および著作権表示を確認する。
 
 ## 前提
 
@@ -24,14 +24,14 @@ gh repo create kazormia296/no-genai-novel-sop-ja \
   --remote=origin \
   --push
 
-git push origin sop-v1.0.0
+git push origin sop-v1.0.1
 ```
 
 `--push` 後にも、正式版タグがリモートへ存在することを明示的に確認する。
 
 ```sh
 git ls-remote --heads origin main
-git ls-remote --tags origin sop-v1.0.0
+git ls-remote --tags origin sop-v1.0.1
 ```
 
 ## 公開後の確認
@@ -46,7 +46,7 @@ gh repo view kazormia296/no-genai-novel-sop-ja \
 - 所有者とリポジトリ名が正しい。
 - 非公開設定になっている。
 - 既定ブランチが `main` である。
-- `sop-v1.0.0` が想定コミットを指している。
+- `sop-v1.0.1` が想定コミットを指している。
 - リモートの `docs/SOP.md` がローカルのSHA-256と一致する。
 
 ## タグの取扱い

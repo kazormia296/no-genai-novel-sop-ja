@@ -2,7 +2,7 @@
 title: "生成AI非使用による小説制作 標準作業手順書"
 short_title: "小説制作AI非使用SOP"
 document_id: "SOP-NOVEL-NO-GENAI-001"
-version: "1.0.0"
+version: "1.0.1"
 status: "運用可能版（組織・個人の承認後に発効）"
 language: "ja-JP"
 confidentiality: "任意"
@@ -15,7 +15,7 @@ confidentiality: "任意"
 | 項目 | 内容 |
 |---|---|
 | 文書ID | SOP-NOVEL-NO-GENAI-001 |
-| 版 | 1.0.0 |
+| 版 | 1.0.1 |
 | 制定日 | YYYY-MM-DD |
 | 発効日 | YYYY-MM-DD |
 | 文書責任者 | 氏名・役割を記入 |
@@ -1126,5 +1126,5 @@ Comments:
 
 | 版 | 日付 | 変更内容 | 作成者 | 承認者 |
 |---|---|---|---|---|
+| 1.0.1 | 2026-07-17 | MIT License追加に伴う管理版更新。規範要件の変更なし | OpenAI Codex（所有者指示） |  |
 | 1.0.0 | 2026-07-17 | 初版制定（生成AIによる草案。人間の承認後に発効） | OpenAI GPT-5.6 Pro |  |
-
