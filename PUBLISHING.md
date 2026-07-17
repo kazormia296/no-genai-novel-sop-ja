@@ -7,7 +7,7 @@
 - GitHub CLI `gh` が導入されている。
 - `gh auth status` が対象アカウントへの認証成功を示す。
 - カレントディレクトリが本リポジトリのルートである。
-- `./tools/verify-release.sh` が `VERIFICATION=PASS` を返す。
+- `./tools/verify-release.sh` が `VERIFICATION=PASS` を返し、CIが成功している。
 - Git作業ツリーがクリーンである。
 
 ## 非公開リポジトリの新規作成
@@ -24,14 +24,14 @@ gh repo create kazormia296/no-genai-novel-sop-ja \
   --remote=origin \
   --push
 
-git push origin sop-v1.1.0
+git push origin sop-v1.2.0
 ```
 
 `--push` 後にも、正式版タグがリモートへ存在することを明示的に確認する。
 
 ```sh
 git ls-remote --heads origin main
-git ls-remote --tags origin sop-v1.1.0
+git ls-remote --tags origin sop-v1.2.0
 ```
 
 ## 公開後の確認
@@ -46,12 +46,18 @@ gh repo view kazormia296/no-genai-novel-sop-ja \
 - 所有者とリポジトリ名が正しい。
 - 非公開設定になっている。
 - 既定ブランチが `main` である。
-- `sop-v1.1.0` が想定コミットを指している。
+- `sop-v1.2.0` が想定コミットを指している。
 - リモートの `docs/SOP.md` がローカルのSHA-256と一致する。
 
 ## タグの取扱い
 
 公開済みの正式版タグは移動、上書きまたは再利用しない。内容変更が必要な場合は、`VERSIONING.md` に従って新しい版番号を付与する。
+
+タグ作成後は次を実行し、タグが注釈付きでHEADを指すことまで確認する。
+
+```sh
+./tools/verify-release.sh --require-tag
+```
 
 ## 公開範囲の変更
 
